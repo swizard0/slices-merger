@@ -1,0 +1,7 @@
+[package]
+name = "slices-merger"
+version = "0.1.0"
+authors = ["Alexey Voznyuk <me@swizard.info>"]
+
+[lib]
+name = "slices_merger"
