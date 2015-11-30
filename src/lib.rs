@@ -10,10 +10,18 @@ pub struct SlicesMerger<T> {
 
 impl<T> SlicesMerger<T> {
     pub fn new() -> SlicesMerger<T> {
-        SlicesMerger { 
-            switch: Switch::StateInit, 
+        SlicesMerger {
+            switch: Switch::StateInit,
             union_buf_a: Vec::new(),
-            union_buf_b: Vec::new(), 
+            union_buf_b: Vec::new(),
+        }
+    }
+
+    pub fn from(init_vec: Vec<T>) -> SlicesMerger<T> {
+        SlicesMerger {
+            switch: Switch::StateB,
+            union_buf_b: Vec::with_capacity(init_vec.len() + 1),
+            union_buf_a: init_vec,
         }
     }
 
@@ -27,6 +35,13 @@ impl<T> SlicesMerger<T> {
             Switch::StateA => { self.switch = Switch::StateB; union_into(&mut self.union_buf_a, Some(&self.union_buf_b[..]), items) },
             Switch::StateB => { self.switch = Switch::StateA; union_into(&mut self.union_buf_b, Some(&self.union_buf_a[..]), items) },
         };
+    }
+
+    pub fn finish(self) -> Vec<T> {
+        match self.switch {
+            Switch::StateA => self.union_buf_b,
+            Switch::StateB | Switch::StateInit => self.union_buf_a,
+        }
     }
 }
 
@@ -107,5 +122,11 @@ mod test {
         merger.add(&[4]);
         assert_eq!(&merger[..], &[4]);
     }
-}
 
+    #[test]
+    fn from_finish() {
+        let mut merger = SlicesMerger::from(vec![1, 3, 4, 5, 7]);
+        merger.add(&[2, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(merger.finish(), vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+}
