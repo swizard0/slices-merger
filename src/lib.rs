@@ -27,6 +27,7 @@ impl<T> SlicesMerger<T> {
 
     pub fn reset(&mut self) {
         self.switch = Switch::StateInit;
+        self.union_buf_a.clear();
     }
 
     pub fn add(&mut self, items: &[T]) where T: Clone + PartialOrd + PartialEq {
